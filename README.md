@@ -41,7 +41,7 @@ DATABASE_URI=root:1234@tcp(localhost:3306)/songvut?charset=utf8mb4&parseTime=Tru
 - GET /api/books
 - GET /api/book/:id
 - PUT /api/book/:id
-- DLETE /api/book/:id
+- DELETE /api/book/:id
 
 ## Referrence
 
