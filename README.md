@@ -4,7 +4,7 @@
 
 Create project name `fiber-crud-mysql` and initial as follows:
 
-```command
+```cmd
 mkdir fiber-crud-mysql
 cd fiber-crud-mysql
 go mod init fiber-crud-mysql
@@ -14,7 +14,7 @@ go mod init fiber-crud-mysql
 
 Install dependencies, which are as follows:
 
-```command
+```cmd
 go get github.com/gofiber/fiber/v2
 go get gorm.io/gorm
 go get gorm.io/driver/mysql
@@ -31,7 +31,7 @@ Add your application configuration to `.env` file in the root of project:
 - Database port: `3306`
 - Database schema: `songvut` 
 
-```dotenv
+```text
 DATABASE_URI=root:1234@tcp(localhost:3306)/songvut?charset=utf8mb4&parseTime=True&loc=Local
 ```
 
