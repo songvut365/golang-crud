@@ -31,6 +31,7 @@ func GetTodos(c *fiber.Ctx) error {
 
 	var todos []models.Todo = make([]models.Todo, 0)
 
+	//decode each item to todos
 	err = cursor.All(c.Context(), &todos)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -51,8 +52,10 @@ func GetTodos(c *fiber.Ctx) error {
 func GetTodo(c *fiber.Ctx) error {
 	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
 
+	//get id from params
 	paramID := c.Params("id")
 
+	//convert param id to object id for bson
 	id, err := primitive.ObjectIDFromHex(paramID)
 
 	if err != nil {
@@ -63,6 +66,7 @@ func GetTodo(c *fiber.Ctx) error {
 		})
 	}
 
+	//find todo and return
 	todo := &models.Todo{}
 
 	query := bson.D{{Key: "_id", Value: id}}
@@ -88,8 +92,10 @@ func GetTodo(c *fiber.Ctx) error {
 func CreateTodo(c *fiber.Ctx) error {
 	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
 
+	//new empty todo
 	data := new(models.Todo)
 
+	//parser todo from payload to data
 	err := c.BodyParser(&data)
 
 	if err != nil {
@@ -106,6 +112,7 @@ func CreateTodo(c *fiber.Ctx) error {
 	data.CreatedAt = time.Now()
 	data.UpdatedAt = time.Now()
 
+	//insert todo to collection
 	result, err := todoCollection.InsertOne(c.Context(), data)
 
 	if err != nil {
@@ -117,8 +124,11 @@ func CreateTodo(c *fiber.Ctx) error {
 	}
 
 	todo := &models.Todo{}
+
+	//create query from todo id
 	query := bson.D{{Key: "_id", Value: result.InsertedID}}
 
+	//find todo after insert
 	todoCollection.FindOne(c.Context(), query).Decode(todo)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -133,8 +143,10 @@ func CreateTodo(c *fiber.Ctx) error {
 func UpdateTodo(c *fiber.Ctx) error {
 	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
 
+	//get id from params
 	paramID := c.Params("id")
 
+	//convert param id to object id for bson
 	id, err := primitive.ObjectIDFromHex(paramID)
 
 	if err != nil {
@@ -145,6 +157,7 @@ func UpdateTodo(c *fiber.Ctx) error {
 		})
 	}
 
+	//new empty todo
 	data := new(models.Todo)
 	err = c.BodyParser(&data)
 
@@ -156,6 +169,7 @@ func UpdateTodo(c *fiber.Ctx) error {
 		})
 	}
 
+	//create query from todo id
 	query := bson.D{{Key: "_id", Value: id}}
 
 	var dataToUpdate bson.D
@@ -174,6 +188,7 @@ func UpdateTodo(c *fiber.Ctx) error {
 		{Key: "$set", Value: dataToUpdate},
 	}
 
+	//update todo
 	err = todoCollection.FindOneAndUpdate(c.Context(), query, update).Err()
 
 	if err != nil {
@@ -194,6 +209,7 @@ func UpdateTodo(c *fiber.Ctx) error {
 
 	todo := &models.Todo{}
 
+	//find todo after update
 	todoCollection.FindOne(c.Context(), query).Decode(todo)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -207,8 +223,10 @@ func UpdateTodo(c *fiber.Ctx) error {
 func DeleteTodo(c *fiber.Ctx) error {
 	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
 
+	//get id from params
 	paramID := c.Params("id")
 
+	//convert param id to object id for bson
 	id, err := primitive.ObjectIDFromHex(paramID)
 
 	if err != nil {
@@ -219,6 +237,7 @@ func DeleteTodo(c *fiber.Ctx) error {
 		})
 	}
 
+	//delete todo
 	query := bson.D{{Key: "_id", Value: id}}
 
 	err = todoCollection.FindOneAndDelete(c.Context(), query).Err()
