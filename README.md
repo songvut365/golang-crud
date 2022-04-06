@@ -10,6 +10,25 @@ cd fiber-crud-mysql
 go mod init fiber-crud-mysql
 ```
 
+## Folder Structure
+
+```text
+FIBER-CRUD-MYSQL
+│ .env
+│ go.mod
+│ go.sum
+│ main.go
+│
+├───configs
+│     database.go
+│
+├───handlers
+│     book.go
+│
+└───models
+      book.go
+```
+
 ## Installation
 
 Install dependencies, which are as follows:
