@@ -11,24 +11,27 @@ import (
 func GetEmployees(c echo.Context) error {
 	db := config.DB
 
+	// Find employees
 	employees := []model.Employee{}
 
 	sqlStatement := "SELECT * FROM employees ORDER BY id"
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, model.Response{
-			Status:  "error",
+			Status:  "Error",
 			Message: err.Error(),
 		})
 	}
 	defer rows.Close()
 
+	// Push employee to array
 	for rows.Next() {
 		employee := model.Employee{}
 		rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.Salary, &employee.Age)
 		employees = append(employees, employee)
 	}
 
+	// Success
 	result := model.Response{
 		Status:  "Success",
 		Message: "Get employees sucess",
@@ -39,9 +42,41 @@ func GetEmployees(c echo.Context) error {
 }
 
 func GetEmployee(c echo.Context) error {
+	db := config.DB
+
+	// Find employees
 	id := c.Param("id")
 
-	return c.String(http.StatusOK, "Get Employee"+id)
+	sqlStatement := "SELECT * FROM employees WHERE id=$1 ORDER BY id"
+	rows, err := db.Query(sqlStatement, id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.Response{
+			Status:  "Error",
+			Message: err.Error(),
+		})
+	}
+	defer rows.Close()
+
+	// Push employee to array
+	var employee model.Employee
+
+	rows.Next()
+	err = rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.Salary, &employee.Age)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, model.Response{
+			Status:  "Error",
+			Message: "Employee not found",
+		})
+	}
+
+	// Success
+	result := model.Response{
+		Status:  "Success",
+		Message: "Get employee sucess",
+		Data:    employee,
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 func CreateEmployee(c echo.Context) error {
