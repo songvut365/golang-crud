@@ -44,26 +44,14 @@ func GetEmployees(c echo.Context) error {
 func GetEmployee(c echo.Context) error {
 	db := config.DB
 
-	// Find employees
+	// Find employee
 	id := c.Param("id")
-
-	sqlStatement := "SELECT * FROM employees WHERE id=$1 ORDER BY id"
-	rows, err := db.Query(sqlStatement, id)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, model.Response{
-			Status:  "Error",
-			Message: err.Error(),
-		})
-	}
-	defer rows.Close()
-
-	// Push employee to array
 	var employee model.Employee
 
-	rows.Next()
-	err = rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.Salary, &employee.Age)
+	sqlStatement := "SELECT * FROM employees WHERE id = $1"
+	err := db.QueryRow(sqlStatement, id).Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.Salary, &employee.Age)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, model.Response{
+		return c.JSON(http.StatusBadRequest, model.Response{
 			Status:  "Error",
 			Message: "Employee not found",
 		})
@@ -80,7 +68,37 @@ func GetEmployee(c echo.Context) error {
 }
 
 func CreateEmployee(c echo.Context) error {
-	return c.String(http.StatusOK, "Create Employee")
+	db := config.DB
+
+	// Parser
+	var employee model.Employee
+
+	err := c.Bind(&employee)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, model.Response{
+			Status:  "Error",
+			Message: err.Error(),
+		})
+	}
+
+	// Create employee
+	sqlStatement := "INSERT INTO employees (first_name, last_name, salary, age) VALUES ($1, $2, $3, $4) RETURNING id"
+	err = db.QueryRow(sqlStatement, employee.FirstName, employee.LastName, employee.Salary, employee.Age).Scan(&employee.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.Response{
+			Status:  "Error",
+			Message: err.Error(),
+		})
+	}
+
+	// Success
+	result := model.Response{
+		Status:  "Success",
+		Message: "Create employee sucess",
+		Data:    employee,
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 func UpdateEmployee(c echo.Context) error {
