@@ -94,7 +94,7 @@ func CreateEmployee(c echo.Context) error {
 	// Success
 	result := model.Response{
 		Status:  "Success",
-		Message: "Create employee sucess",
+		Message: "Create employee success",
 		Data:    employee,
 	}
 
@@ -102,13 +102,62 @@ func CreateEmployee(c echo.Context) error {
 }
 
 func UpdateEmployee(c echo.Context) error {
-	id := c.Param("id")
+	db := config.DB
 
-	return c.String(http.StatusOK, "Update Employee"+id)
+	// Parser
+	var employee model.Employee
+
+	err := c.Bind(&employee)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, model.Response{
+			Status:  "Error",
+			Message: err.Error(),
+		})
+	}
+
+	// Update employee
+	id := c.Param("id")
+	employee.ID = &id
+
+	sqlStatement := "UPDATE employees SET first_name = $1, last_name = $2, salary = $3, age = $4 WHERE id = $5"
+	_, err = db.Query(sqlStatement, employee.FirstName, employee.LastName, employee.Salary, employee.Age, id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.Response{
+			Status:  "Error",
+			Message: err.Error(),
+		})
+	}
+
+	// Success
+	result := model.Response{
+		Status:  "Success",
+		Message: "Update employee success",
+		Data:    employee,
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 func DeleteEmployee(c echo.Context) error {
+	db := config.DB
+
+	// Delete employee
 	id := c.Param("id")
 
-	return c.String(http.StatusOK, "Delete Employee"+id)
+	sqlStatement := "DELETE FROM employees WHERE id = $1"
+	_, err := db.Query(sqlStatement, id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.Response{
+			Status:  "Error",
+			Message: err.Error(),
+		})
+	}
+
+	// Success
+	result := model.Response{
+		Status:  "Success",
+		Message: "Delete employee success",
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
