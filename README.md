@@ -11,9 +11,15 @@ $ go run main.go
 
 This project doesn't use GORM or auto migration, so databases and tables have to be created manually.
 
-```cmd
+#### Table: employees
 
-```
+| Name | Type |
+|:-----|-----:|
+| id | string |
+| first_name | string |
+| last_name | string |
+| salary | string |
+| age | string |
 
 ## Environment
 
