@@ -1,5 +1,7 @@
 # Golang CRUD Application
 
+![screenshot-1](document/screenshot-1.jpg)
+
 ## Table of contents
 
 | Repo |Framework|Database| Detail |
